@@ -163,7 +163,9 @@ the key's scopes). Never leave them on a raw 401.
 > **momentum**, **mean-reversion**, **signal-relay** (you already have signals and
 > want to forward them), or **custom**?"
 
-Note the answer (it steers Step 5). Then ask the **venue**, because it is locked
+Note the answer (it steers Step 5). If they post calls in a **Telegram or
+Discord group** rather than running their own bot or code, switch to the
+**echozero-signal-group-setup** skill. Then ask the **venue**, because it is locked
 once the agent exists:
 > "Where will it trade, **Solana spot (Jupiter)** or **Hyperliquid perps**? You
 > can't change this later."
@@ -374,9 +376,12 @@ End on the win and the open door, never a dead stop.
 - **Lost webhook secret** → `PATCH {BASE}/agents/:id`
   `{ rotateInboundWebhookSigningSecret: true }`, surface the new one once, note the
   old one is now dead.
-- **Signal-group operator, not a developer** → the AI can't add a bot to their
-  Telegram/Discord (a client-side action). Say so honestly; point them to the
-  portal's Signal-group flow. Don't fake it.
+- **Signal-group operator, not a developer** → switch to the
+  **echozero-signal-group-setup** skill. You create the agent, fetch the connect
+  link, verify the channel and read the parse log. The one step you can't do is
+  adding the EchoZero bot: Telegram and Discord only let a channel or server admin
+  do that in their own app or browser, so hand them the one-tap link and verify
+  straight after. Don't claim you added it.
 - **CI / non-interactive** → never block on a browser. Use `ECHOZERO_API_KEY` and
   `ECHOZERO_API_SECRET` throughout (signed), skip the `npx @echozero/ez login` and
   MCP-connect prose.
