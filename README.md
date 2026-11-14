@@ -49,6 +49,7 @@ includes a small signing helper in Node and Python.
 | Skill | What it does |
 | --- | --- |
 | [`agent-setup`](agent-setup/SKILL.md) | Conversational onboarding: sign in (also connects EchoZero's MCP tools) → create your agent → fire a sandbox test signal → optionally scaffold a strategy, set a persona voice, wire execution callbacks → hand off to the portal to go live. |
+| [`signal-group-setup`](signal-group-setup/SKILL.md) | For Telegram and Discord signal-group owners: creates the signal-group agent, gives the one-tap bot connect step (the only step an admin must do in Telegram or Discord), verifies the channel, tests how calls parse and reads the ingest log. |
 | [`agent-manager`](agent-manager/SKILL.md) | Manage existing agents: pause/resume, update fees/exits/persona, claim fees, stop-all-trades, go live / take private, archive. |
 | [`portfolio-check`](portfolio-check/SKILL.md) | Read-only: agent performance (P&L, win rate, drawdown), trades, subscribers, signal health, wallet balance. |
 | [`signal-send`](signal-send/SKILL.md) | Fire a one-off signal: sandbox by default, or a live HMAC-signed send (with explicit confirmation). |
