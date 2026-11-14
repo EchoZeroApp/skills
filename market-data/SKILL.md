@@ -8,7 +8,7 @@ description: >-
   data", or "get me a quote". Read-only.
 ---
 
-# EchoZero — Market Data
+# EchoZero: Market Data
 
 You fetch the token & market data EchoZero serves, so a developer can decide what
 to trade and size a signal. (EchoZero agents trade on Solana spot (Jupiter) or
@@ -17,7 +17,7 @@ where token resolution for a signal comes from) and the trading skills.
 
 **Be honest about scope.** EchoZero's market endpoints expose **price, volume,
 market cap, trending rank, token metadata, and swap quotes**. They do **not** serve
-standalone **RSI / technical indicators** or a **sentiment / Fear-&-Greed** feed —
+standalone **RSI / technical indicators** or a **sentiment / Fear-&-Greed** feed;
 those are not available as developer API endpoints. If a user asks for RSI or sentiment, give them what's available and say
 the indicator/sentiment feeds aren't on the public API (don't invent a number).
 
@@ -30,10 +30,10 @@ the indicator/sentiment feeds aren't on the public API (don't invent a number).
    price lookup behind a login that isn't required.
 2. **Summarize, don't dump.** Headline number first (price, 24h move), then a tight
    breakdown. Never paste raw token JSON.
-3. **Say what's not there.** No RSI/sentiment endpoint — state it plainly rather
+3. **Say what's not there.** No RSI/sentiment endpoint: state it plainly rather
    than estimating or implying you fetched it.
 4. **Resolve, then confirm identity.** Token symbols are ambiguous and spoofable on
-   Solana — when you resolve a symbol to a mint, show the **symbol + mint + market
+   Solana. When you resolve a symbol to a mint, show the **symbol + mint + market
    cap/volume** so the user can tell the real one from an impostor before they act
    on it.
 5. **Stamp freshness and units.** Quote prices with currency and "as of now";
@@ -46,18 +46,17 @@ the indicator/sentiment feeds aren't on the public API (don't invent a number).
 
 Read from the environment; do not hardcode:
 
-- `ECHOZERO_MCP_URL` — host root. Auth/verify at the root
-  (`{ECHOZERO_MCP_URL}/status`), if you authenticate at all.
-- `ECHOZERO_API_BASE` — REST base = `{ECHOZERO_MCP_URL}/api/v1` (prod
+- `ECHOZERO_MCP_URL`: host root. Auth/verify at the root
+  (`{ECHOZERO_MCP_URL}/status`), if you authenticate at all. Production:
+  `https://mcp.echozero.app`.
+- `ECHOZERO_API_BASE`: REST base = `{ECHOZERO_MCP_URL}/api/v1` (prod
   `https://mcp.echozero.app/api/v1`). All token reads sit under it.
 - `ECHOZERO_API_KEY`, optional here; send as `x-api-key` if present. With an API
   key, also send `x-timestamp` and `x-signature` (HMAC with `ECHOZERO_API_SECRET`,
   see echozero-agent-setup Appendix E1). Public reads need neither.
 
-> ✅ Host confirmed live: `mcp.echozero.app` is listed as the REST/MCP host in
-> `https://echozero.app/llms.txt`; the `/v1` suffix is confirmed by direct endpoint
-> testing, not that file's shorthand. `api.echozero.app` is a **different, live**
-> EchoZero host — dev API paths 404 there.
+Docs index: `https://docs.echozero.app/llms.txt`. API spec:
+`https://mcp.echozero.app/api/docs-json`.
 
 **Prefer connected MCP tools when present** (`get_trending_tokens`, `get_token`,
 `get_tokens`, `get_trade_quote`). REST is the fallback for any runner.
@@ -69,17 +68,17 @@ Read from the environment; do not hardcode:
 ### Trending tokens
 
 `GET {BASE}/tokens/trending` (public; sorted by volume / market cap). Show a short
-ranked list — symbol, price, 24h move, volume — and offer detail on any:
+ranked list (symbol, price, 24h move, volume) and offer detail on any:
 > "Top trending on Solana right now: 1) WIF $2.41 (+8% 24h) · 2) BONK … Want detail
 > or a quote on any?"
 
 ### Token detail / price
 
-`GET {BASE}/tokens/{idOrSymbol}` — accepts a MongoDB token `_id`, a **symbol**
+`GET {BASE}/tokens/{idOrSymbol}` accepts a MongoDB token `_id`, a **symbol**
 (case-insensitive, e.g. `SOL` or `sol`), or a **mint address** (Solana base58). Returns price, market cap, volume, metadata, and the token's
 **mint address**. Lead with the answer they asked for:
 > "BONK: **$0.0000142**, +3.1% 24h · mkt cap $980M · 24h vol $74M."
-Carry the **mint** from this payload forward when handing off to a signal — symbols
+Carry the **mint** from this payload forward when handing off to a signal: symbols
 are ambiguous, the mint is exact. If a short symbol matches several tokens, fall back
 to `GET {BASE}/tokens?query=…` and confirm identity per rule 4.
 
@@ -91,7 +90,7 @@ identity per rule 4.
 
 ### Swap quote
 
-`GET {BASE}/ai/trades/quote` (MCP: `get_trade_quote`) — what a given size would get
+`GET {BASE}/ai/trades/quote` (MCP: `get_trade_quote`): what a given size would get
 at current routing. Use when they ask "what would X get me" or to sanity-check size
 before a signal. State it's an indicative quote, not a fill. This route needs auth
 (a token, or a signed API key).
@@ -108,7 +107,7 @@ Example: `GET {BASE}/ai/trades/quote?action=BUY&tokenAddress=<mint>&amountUsd=10
 
 ### Not available (say so if asked)
 
-- **RSI / MACD / technical indicators** — not a developer endpoint.
+- **RSI / MACD / technical indicators**: not a developer endpoint.
 - **Sentiment / Fear & Greed**: not served via the API.
 Offer the closest real signal instead (price action, 24h move, volume, trending
 rank), and don't fabricate an indicator value.
@@ -118,16 +117,18 @@ rank), and don't fabricate an indicator value.
 ## Putting it to use
 
 When market data is the prelude to an action, hand off cleanly:
-> "WIF looks like what you meant — $2.41, $120M 24h vol, mint `EKpQ…`. Want me to
+> "WIF looks like what you meant: $2.41, $120M 24h vol, mint `EKpQ…`. Want me to
 > send a buy signal for it? (echozero-signal-send)"
-Always carry the **confirmed mint** forward, never just the symbol.
+Always carry the **confirmed mint** forward, not the symbol alone.
 
 ---
 
 ## Failure & edge handling
 
-- **404 on a call** → fetch `https://echozero.app/llms.txt`, fix the host, retry
-  once; else name the failed call and stop.
+- **404 on a call** → check the path against the docs index
+  (`https://docs.echozero.app/llms.txt`) and the API spec
+  (`https://mcp.echozero.app/api/docs-json`), retry once; else name the failed call
+  and stop.
 - **Symbol matches several tokens** → list the candidates with mint + market cap and
   ask which; never pick silently.
 - **Token not found / no price** → say so plainly; suggest searching by mint.
@@ -138,7 +139,7 @@ Always carry the **confirmed mint** forward, never just the symbol.
 
 ---
 
-## Endpoint / tool cheat sheet (confirm host against llms.txt)
+## Endpoint / tool cheat sheet (verify against the API spec)
 
 | Purpose | REST call | MCP tool |
 |---|---|---|
@@ -154,10 +155,10 @@ Auth header (optional for public reads): `Authorization: Bearer <oauth-token>` *
 
 ## Runner variants
 
-One skill, three runners — the only difference is the sign-in trigger:
-- **Claude Code** — `npx @echozero/ez login --client claude` (MCP auto-wired into Claude's config).
-- **Codex** — `npx @echozero/ez login --client codex` (writes Codex MCP config).
-- **OpenClaw** — `npx @echozero/ez login --client openclaw` (writes OpenClaw config).
+One skill, three runners. The only difference is the sign-in trigger:
+- **Claude Code**: `npx @echozero/ez login --client claude` (MCP auto-wired into Claude's config).
+- **Codex**: `npx @echozero/ez login --client codex` (writes Codex MCP config).
+- **OpenClaw**: `npx @echozero/ez login --client openclaw` (writes OpenClaw config).
 Flow, copy, and API contracts are identical across all three (most reads here are
 public anyway). Don't fork this file per runner; if the installer needs per-runner
-artifacts, generate them from this source. (See SKILL-AUTHORING-GUIDE.md, Part 6.)
+artifacts, generate them from this source. (See CONTRIBUTING.md.)
