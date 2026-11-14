@@ -6,9 +6,9 @@ agent, send signals, check P&L, and manage fees. The skills talk to the EchoZero
 REST API, so they work in any agent runner; when connected over MCP they use the
 live tools directly.
 
-> EchoZero is a custodial trading-agent platform, each agent trades on either
-> Solana spot (Jupiter) or Hyperliquid perps, while each user
-> sees one custodial wallet and one USDC balance. Developers run their strategy code
+> EchoZero is a trading-agent platform. Each agent trades on either Solana spot
+> (Jupiter) or Hyperliquid perps. Each user's funds sit in their own wallet
+> (powered by Privy), with one USDC balance. Developers run their strategy code
 > off-platform and send **signals** to EchoZero over a webhook; EchoZero executes
 > and manages the trades for subscribers.
 
@@ -29,7 +29,14 @@ npx @echozero/ez login --client claude    # or: codex, openclaw
 (The scoped npm package is `@echozero/ez`; the bare name `ez` belongs to an unrelated
 package.) Start with the **agent-setup** skill. It targets the live production API at
 `https://mcp.echozero.app`. Full documentation is at
-[docs.echozero.app](https://docs.echozero.app).
+[docs.echozero.app](https://docs.echozero.app) (index for assistants:
+<https://docs.echozero.app/llms.txt>; API spec:
+<https://mcp.echozero.app/api/docs-json>).
+
+Test first. Every skill defaults to the sandbox
+(<https://docs.echozero.app/guides/sandbox>) and virtual wallet mode. A live
+signal executes for subscribers, so the skills ask for an explicit confirmation
+before any live send.
 
 Headless / CI path: create an API key in the developer portal
 (`https://devportal.echozero.app`) and export `ECHOZERO_API_KEY`,
@@ -41,10 +48,10 @@ includes a small signing helper in Node and Python.
 
 | Skill | What it does |
 | --- | --- |
-| [`agent-setup`](agent-setup/SKILL.md) | Conversational onboarding: sign in (also connects EchoZero's MCP tools) → create your agent → fire a test signal → optionally scaffold a strategy, set a persona voice, wire execution callbacks → hand off to the portal to go live. |
+| [`agent-setup`](agent-setup/SKILL.md) | Conversational onboarding: sign in (also connects EchoZero's MCP tools) → create your agent → fire a sandbox test signal → optionally scaffold a strategy, set a persona voice, wire execution callbacks → hand off to the portal to go live. |
 | [`agent-manager`](agent-manager/SKILL.md) | Manage existing agents: pause/resume, update fees/exits/persona, claim fees, stop-all-trades, go live / take private, archive. |
 | [`portfolio-check`](portfolio-check/SKILL.md) | Read-only: agent performance (P&L, win rate, drawdown), trades, subscribers, signal health, wallet balance. |
-| [`signal-send`](signal-send/SKILL.md) | Fire a one-off signal — safe sandbox by default, or a live HMAC-signed send (with confirmation). |
+| [`signal-send`](signal-send/SKILL.md) | Fire a one-off signal: sandbox by default, or a live HMAC-signed send (with explicit confirmation). |
 | [`market-data`](market-data/SKILL.md) | Solana market data: trending tokens, token price/detail/search, swap quotes. |
 
 ## Runners
@@ -52,13 +59,12 @@ includes a small signing helper in Node and Python.
 Each skill is one runner-complete file covering **Claude Code, Codex, and OpenClaw**
 inline. The only per-runner difference is the sign-in trigger
 (`npx @echozero/ez login --client claude|codex|openclaw`); flow, copy, and API contracts are
-identical. We don't fork per-runner files — see the authoring guide, Part 6.
+identical. We don't fork per-runner files; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing / adding a skill
 
-Read **[SKILL-AUTHORING-GUIDE.md](SKILL-AUTHORING-GUIDE.md)** first. It is the quality
-playbook: principles, required structure, the EchoZero API reference, a QA checklist,
-and the build process. The top rule: **verify every endpoint and field against the
+Read **[CONTRIBUTING.md](CONTRIBUTING.md)** first. It covers the skill structure
+and the QA checklist. The top rule: **verify every endpoint and field against the
 public API spec (<https://mcp.echozero.app/api/docs-json>) and the docs
 (<https://docs.echozero.app>) before writing it down. Don't guess.**
 
